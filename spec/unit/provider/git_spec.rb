@@ -595,6 +595,12 @@ describe Chef::Provider::Git do
     expect { @provider.run_action(:sync) }.to raise_error(Chef::Exceptions::MissingParentDirectory)
   end
 
+  it "raises an error if the user does not exist" do
+    @resource.user("whois")
+    expect(@provider).to receive(:get_dir)
+    expect { @provider.run_action(:sync) }.to raise_error(Chef::Exceptions::User)
+  end
+
   it "does a checkout by cloning the repo and then enabling submodules" do
     # will be invoked in load_current_resource
     allow(::File).to receive(:exist?).with("/my/deploy/dir/.git").and_return(false)
