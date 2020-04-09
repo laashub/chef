@@ -21,7 +21,7 @@
 @rem the line is read. See help for the /E switch from cmd.exe /? .
 @setlocal ENABLEDELAYEDEXPANSION
 
-<%= "SETX HTTP_PROXY \"#{knife_config[:bootstrap_proxy]}\"" if knife_config[:bootstrap_proxy] %>
+<%= "SETX HTTP_PROXY \"#{config[:bootstrap_proxy]}\"" if config[:bootstrap_proxy] %>
 
 @set BOOTSTRAP_DIRECTORY=<%= bootstrap_directory %>
 @echo Checking for existing directory "%BOOTSTRAP_DIRECTORY%"...
@@ -92,10 +92,10 @@ goto architecture_select
 goto Version10.0
 
 :architecture_select
-<% if knife_config[:architecture] %>
-  @set MACHINE_ARCH=<%= knife_config[:architecture] %>
+<% if config[:architecture] %>
+  @set MACHINE_ARCH=<%= config[:architecture] %>
 
-  <% if knife_config[:architecture] == "x86_64" %>
+  <% if config[:architecture] == "x86_64" %>
       IF "%PROCESSOR_ARCHITECTURE%"=="x86" IF not defined PROCESSOR_ARCHITEW6432 (
       echo You specified bootstrap_architecture as x86_64 but the target machine is i386. A 64 bit program cannot run on a 32 bit machine. > "&2"
       echo Exiting without bootstrapping. > "&2"

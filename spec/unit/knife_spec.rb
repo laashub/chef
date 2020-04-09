@@ -1,7 +1,7 @@
 #
 # Author:: Adam Jacob (<adam@chef.io>)
 # Author:: Tim Hinderliter (<tim@chef.io>)
-# Copyright:: Copyright 2008-2016, Chef Software Inc.
+# Copyright:: Copyright 2008-2020, Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -351,6 +351,24 @@ describe Chef::Knife do
         knife_command = Chef::Knife.run(%w{test yourself --no-listen}, Chef::Application::Knife.options)
         expect(Chef::Config[:listen]).to be(false)
         expect(knife_command.config_source(:listen)).to eq(:cli)
+      end
+
+      it "merges Chef::Config[:knife] values into the config hash even if they have no cli keys" do
+        Chef::Config[:knife][:opt_with_no_cli_key] = "from-knife-config"
+        knife_command = KnifeSpecs::TestYourself.new([]) # empty argv
+        knife_command.configure_chef
+        expect(knife_command.config[:opt_with_no_cli_key]).to eq("from-knife-config")
+        expect(knife_command.config_source(:opt_with_no_cli_key)).to eq(:config)
+      end
+
+      it "merges Chef::Config[:knife] default values into the config hash even if they have no cli keys" do
+        Chef::Config.config_context :knife do
+          default :opt_with_no_cli_key, "from-knife-default"
+        end
+        knife_command = KnifeSpecs::TestYourself.new([]) # empty argv
+        knife_command.configure_chef
+        expect(knife_command.config[:opt_with_no_cli_key]).to eq("from-knife-default")
+        expect(knife_command.config_source(:opt_with_no_cli_key)).to eq(:config_default)
       end
 
       context "verbosity is one" do
