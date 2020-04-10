@@ -94,4 +94,15 @@ describe Chef::Resource::Locale, :requires_root do
       expect { resource.run_action(:update) }.to raise_error(Chef::Exceptions::ProviderNotFound)
     end
   end
+
+  context "on windows", :windows_only, requires_root: false do
+    describe "action: update" do
+      context "Sets system locale" do
+        it "when lang is given" do
+          resource.lang("en-US")
+          resource.run_action(:update)
+        end
+      end
+    end
+  end
 end

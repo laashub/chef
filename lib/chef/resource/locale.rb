@@ -1,3 +1,4 @@
+
 #
 # Copyright:: 2011-2016, Heavy Water Software Inc.
 # Copyright:: 2016-2020, Chef Software Inc.
@@ -30,7 +31,7 @@ class Chef
       LC_VARIABLES = %w{LC_ADDRESS LC_COLLATE LC_CTYPE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TIME}.freeze
       LOCALE_CONF = "/etc/locale.conf".freeze
       LOCALE_REGEX = /\A\S+/.freeze
-      LOCALE_PLATFORM_FAMILIES = %w{debian}.freeze
+      LOCALE_PLATFORM_FAMILIES = %w{debian windows}.freeze
 
       property :lang, String,
         description: "Sets the default system language.",
@@ -69,8 +70,12 @@ class Chef
         description "Update the system's locale."
         unless up_to_date?
           converge_by "Updating System Locale" do
-            generate_locales unless unavailable_locales.empty?
-            update_locale
+            if ChefUtils.windows?
+              set_system_locale
+            else
+              generate_locales unless unavailable_locales.empty?
+              update_locale
+            end
           end
         end
       end
@@ -97,6 +102,15 @@ class Chef
         #
         def generate_locales
           shell_out!("locale-gen #{unavailable_locales.join(" ")}")
+        end
+
+        # Windows only: Sets the system locale for the current computer.
+        # @see https://docs.microsoft.com/en-us/powershell/module/internationalcmdlets/set-winsystemlocale
+        #
+        def set_system_locale
+          response = powershell_exec("Set-WinSystemLocale -SystemLocale #{new_resource.lang}")
+
+          raise response.errors.join(" ") if response.error?
         end
 
         # Updates system locale by appropriately writing them in /etc/locale.conf
