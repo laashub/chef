@@ -1,6 +1,6 @@
 #
 # Author:: Adam Jacob (<adam@chef.io>)
-# Copyright:: Copyright 2009-2018, Chef Software Inc.
+# Copyright:: Copyright (c) Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,20 +79,20 @@ class Chef
         short: "-p PORT",
         long: "--ssh-port PORT",
         description: "The ssh port.",
-        proc: Proc.new { |key| Chef::Config[:knife][:ssh_port] = key.strip }
+        proc: Proc.new { |key| key.strip }
 
       option :ssh_timeout,
         short: "-t SECONDS",
         long: "--ssh-timeout SECONDS",
         description: "The ssh connection timeout.",
-        proc: Proc.new { |key| Chef::Config[:knife][:ssh_timeout] = key.strip.to_i },
+        proc: Proc.new { |key| key.strip.to_i },
         default: 120
 
       option :ssh_gateway,
         short: "-G GATEWAY",
         long: "--ssh-gateway GATEWAY",
         description: "The ssh gateway.",
-        proc: Proc.new { |key| Chef::Config[:knife][:ssh_gateway] = key.strip }
+        proc: Proc.new { |key| key.strip }
 
       option :ssh_gateway_identity,
         long: "--ssh-gateway-identity SSH_GATEWAY_IDENTITY",
@@ -125,7 +125,7 @@ class Chef
       option :duplicated_fqdns,
         long: "--duplicated-fqdns",
         description: "Behavior if FQDNs are duplicated, ignored by default.",
-        proc: Proc.new { |key| Chef::Config[:knife][:duplicated_fqdns] = key.strip.to_sym },
+        proc: Proc.new { |key| key.strip.to_sym },
         default: :ignore
 
       option :tmux_split,
@@ -149,7 +149,6 @@ class Chef
       end
 
       def configure_gateway
-        config[:ssh_gateway] ||= Chef::Config[:knife][:ssh_gateway]
         if config[:ssh_gateway]
           gw_host, gw_user = config[:ssh_gateway].split("@").reverse
           gw_host, gw_port = gw_host.split(":")
@@ -273,7 +272,6 @@ class Chef
       def session_options(host, port, user = nil, gateway: false)
         ssh_config = Net::SSH.configuration_for(host, true)
         {}.tap do |opts|
-          # Chef::Config[:knife][:ssh_user] is parsed in #configure_user and written to config[:ssh_user]
           opts[:user] = user || config[:ssh_user] || ssh_config[:user]
           if !gateway && config[:ssh_identity_file]
             opts[:keys] = File.expand_path(config[:ssh_identity_file])
@@ -308,10 +306,8 @@ class Chef
           Chef::Log.debug("Adding #{host}")
           session_opts = session_options(host, ssh_port, gateway: false)
           # Handle port overrides for the main connection.
-          session_opts[:port] = Chef::Config[:knife][:ssh_port] if Chef::Config[:knife][:ssh_port]
           session_opts[:port] = config[:ssh_port] if config[:ssh_port]
           # Handle connection timeout
-          session_opts[:timeout] = Chef::Config[:knife][:ssh_timeout] if Chef::Config[:knife][:ssh_timeout]
           session_opts[:timeout] = config[:ssh_timeout] if config[:ssh_timeout]
           # Handle session prefix
           session_opts[:properties] = { prefix: prefix }
@@ -553,8 +549,7 @@ class Chef
       end
 
       def configure_user
-        config[:ssh_user] = get_stripped_unfrozen_value(config[:ssh_user] ||
-                             Chef::Config[:knife][:ssh_user])
+        config[:ssh_user] = get_stripped_unfrozen_value(config[:ssh_user])
       end
 
       # This is a bit overly complicated because of the way we want knife ssh to work with -P causing a password prompt for
@@ -577,17 +572,16 @@ class Chef
           ssh_password = config.key?(:ssh_password_ng) ? config[:ssh_password_ng] : config[:ssh_password]
           # Otherwise, the password has either been specified on the command line,
           # in knife.rb, or key based auth will be attempted
-          config[:ssh_password] = get_stripped_unfrozen_value(ssh_password ||
-                             Chef::Config[:knife][:ssh_password])
+          config[:ssh_password] = get_stripped_unfrozen_value(ssh_password)
         end
       end
 
       def configure_ssh_identity_file
-        config[:ssh_identity_file] = get_stripped_unfrozen_value(config[:ssh_identity_file] || Chef::Config[:knife][:ssh_identity_file])
+        config[:ssh_identity_file] = get_stripped_unfrozen_value(config[:ssh_identity_file])
       end
 
       def configure_ssh_gateway_identity
-        config[:ssh_gateway_identity] = get_stripped_unfrozen_value(config[:ssh_gateway_identity] || Chef::Config[:knife][:ssh_gateway_identity])
+        config[:ssh_gateway_identity] = get_stripped_unfrozen_value(config[:ssh_gateway_identity])
       end
 
       def run

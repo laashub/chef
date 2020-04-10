@@ -1,6 +1,6 @@
 #
 # Author:: Christopher Webber (<cwebber@chef.io>)
-# Copyright:: Copyright (c) 2014-2019 Chef Software, Inc.
+# Copyright:: Copyright (c) Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,8 +63,7 @@ class Chef
         short: "-m SUPERMARKET_SITE",
         long: "--supermarket-site SUPERMARKET_SITE",
         description: "The URL of the Supermarket site.",
-        default: "https://supermarket.chef.io",
-        proc: Proc.new { |supermarket| Chef::Config[:knife][:supermarket_site] = supermarket }
+        default: "https://supermarket.chef.io"
 
       attr_reader :cookbook_name
       attr_reader :vendor_path

@@ -1,6 +1,6 @@
 #
 # Author:: Adam Jacob (<adam@chef.io>)
-# Copyright:: Copyright 2010-2020, Chef Software Inc.
+# Copyright:: Copyright (c) Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -673,9 +673,8 @@ class Chef
         return @connection_protocol if @connection_protocol
 
         from_url = host_descriptor =~ %r{^(.*)://} ? $1 : nil
-        from_cli = config[:connection_protocol]
-        from_knife = Chef::Config[:knife][:connection_protocol]
-        @connection_protocol = from_url || from_cli || from_knife || "ssh"
+        from_knife = config[:connection_protocol]
+        @connection_protocol = from_url || from_knife || "ssh"
       end
 
       def do_connect(conn_options)
