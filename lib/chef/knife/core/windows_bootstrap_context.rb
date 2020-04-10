@@ -86,21 +86,21 @@ class Chef
 
           # We configure :verify_api_cert only when it's overridden on the CLI
           # or when specified in the knife config.
-          if !config[:node_verify_api_cert].nil? || backcompat_config.key?(:verify_api_cert)
-            value = config[:node_verify_api_cert].nil? ? backcompat_config[:verify_api_cert] : config[:node_verify_api_cert]
+          if !config[:node_verify_api_cert].nil? || config.key?(:verify_api_cert)
+            value = config[:node_verify_api_cert].nil? ? config[:verify_api_cert] : config[:node_verify_api_cert]
             client_rb << %Q{verify_api_cert #{value}\n}
           end
 
           # We configure :ssl_verify_mode only when it's overridden on the CLI
           # or when specified in the knife config.
-          if config[:node_ssl_verify_mode] || backcompat_config.key?(:ssl_verify_mode)
+          if config[:node_ssl_verify_mode] || config.key?(:ssl_verify_mode)
             value = case config[:node_ssl_verify_mode]
                     when "peer"
                       :verify_peer
                     when "none"
                       :verify_none
                     when nil
-                      backcompat_config[:ssl_verify_mode]
+                      config[:ssl_verify_mode]
                     else
                       nil
                     end
@@ -133,7 +133,7 @@ class Chef
             client_rb << %Q{trusted_certs_dir "#{ChefConfig::Config.etc_chef_dir(true)}/trusted_certs"\n}
           end
 
-          if Chef::Config[:fips]
+          if chef_config[:fips]
             client_rb << "fips true\n"
           end
 
